@@ -1,13 +1,11 @@
-// To Dos:
-// DONE line 404: Put Game Over on Screen
-// DONE Logo
-// DOING line 243: Put pause on Screen
-// line 504: blink a row before disappear
-// line 514: Make more lines grant more points
-// Line 413: When game over, pull 'pause' to start the game again
-// Line 391: Small pause when tetromino reach bottom line (settimeout)
-// line 352 || 568 : small bug when rotating next walls
-// Insert Audio
+// Features to be done:
+// Next Piece system
+// Line ~243: Print 'Paused' on Screen
+// Line ~392: Set small pause when tetromino reach bottom line (settimeout)
+// Line ~499: blink a row before disappear
+// Line ~415: When game is over, pull a button to restart the game
+// Line ~521: Improve Score, more lines grants more points
+// Line ~352 || ~568 : bug when rotating next walls or above other pieces
 
 let canvas;
 let ctx;
@@ -18,6 +16,12 @@ let startY = 0; // Initial Y position for Tetromino
 let score = 0; // Tracks the score
 let level = 1; // Tracks current level
 let winOrLose = "Playing";
+
+// Music
+myAudio = new Audio("tetrisTheme.mp3");
+myAudio.volume = 0.05;
+myAudio.loop = true;
+myAudio.play();
 
 // Level Up
 let levelUp = 20;
