@@ -1,3 +1,14 @@
+// To Dos:
+// DONE line 404: Put Game Over on Screen
+// DONE Logo
+// DOING line 243: Put pause on Screen
+// line 504: blink a row before disappear
+// line 514: Make more lines grant more points
+// Line 413: When game over, pull 'pause' to start the game again
+// Line 391: Small pause when tetromino reach bottom line (settimeout)
+// line 352 || 568 : small bug when rotating next walls
+// Insert Audio
+
 let canvas;
 let ctx;
 let gBArrayHeight = 20; // Number of cells of gameboard height
@@ -13,7 +24,7 @@ let levelUp = 20;
 let speed = 1; // set speed to 1
 let timer; // set timer variable to clear interval
 
-// highScore System
+// Pause System
 let isPaused = false;
 
 // Used as a look up table where each value in the array contains the x & y position we can use to draw the box on the canvas
@@ -33,13 +44,13 @@ let tetrominos = [];
 
 // The tetromino colors
 let tetrominoColors = [
-  "#9171EB", // Tetromino T
-  "#67C5EB", // Tetromino I
-  "#7A9DEB", // Tetromino J
-  "#EBE96A", // Tetromino Square
-  "#EBA84B", // Tetromino L
-  "#b9eb80", // Tetromino S
-  "#eb767b", // Tetromino Z
+  "purple", // Tetromino T
+  "cyan", // Tetromino I
+  "blue", // Tetromino J
+  "yellow", // Tetromino Square
+  "orange", // Tetromino L
+  "green", // Tetromino S
+  "red", // Tetromino Z
 ];
 // Holds current Tetromino color
 let curTetrominoColor;
@@ -207,7 +218,7 @@ function HandleKeyPress(e) {
         DrawTetromino();
       }
 
-      // d keycode (RIGHT)
+      // keycode (RIGHT)
     } else if (key === KEYS.RIGHT && !isPaused) {
       // Check if I'll hit the wall
       direction = DIRECTION.RIGHT;
@@ -217,17 +228,22 @@ function HandleKeyPress(e) {
         DrawTetromino();
       }
 
-      // s keycode (DOWN)
+      // keycode (DOWN)
     } else if (key === KEYS.DOWN && !isPaused) {
       MoveTetrominoDown();
 
-      // w keycode calls for rotation of Tetromino
+      // keycode for rotation of Tetromino
     } else if (key === KEYS.ROTATE && !isPaused) {
       RotateTetromino();
 
-      // p keycode calls the pause
+      // keycode for pause
     } else if (key === KEYS.PAUSE) {
       isPaused = !isPaused;
+
+      // The 'Paused' is not working properly, they don't disapear when pause is off
+      // ctx.fillStyle = "black";
+      // ctx.font = "24px Arial";
+      // ctx.fillText("Paused", 95, 36);
     }
   }
 }
@@ -258,9 +274,7 @@ function setSpeed(speed) {
 
 setSpeed(speed);
 
-// Clears the previously drawn Tetromino
-// Do the same stuff when we drew originally
-// but make the square white this time
+// Clears the previously drawn Tetromino when moving
 function DeleteTetromino() {
   for (let i = 0; i < curTetromino.length; i++) {
     let x = curTetromino[i][0] + startX;
@@ -341,6 +355,7 @@ function CreateTetromino() {
 
 // Check if the Tetromino hits the wall
 // Cycle through the squares adding the upper left hand corner position to see if the value is <= to 0 or >= 11. If they are also moving in a direction that would be off the board stop movement
+
 function HittingTheWall() {
   for (let i = 0; i < curTetromino.length; i++) {
     let newX = curTetromino[i][0] + startX;
@@ -363,7 +378,7 @@ function CheckForVerticalCollison() {
 
   // Cycle through all Tetromino squares
   for (let i = 0; i < tetrominoCopy.length; i++) {
-    // Get each square of the Tetromino and adjust the square position so I can check for collisions
+    // Get each square of the Tetromino and adjust the square position so it can check for collisions
     let square = tetrominoCopy[i];
 
     // Move into position based on the changing upper left hand corner of the entire Tetromino shape
@@ -376,7 +391,6 @@ function CheckForVerticalCollison() {
     }
 
     // Check if I'm going to hit a previously set piece
-    // if(gameBoardArray[x][y+1] === 1){
     if (typeof stoppedShapeArray[x][y + 1] === "string") {
       // If so delete Tetromino
       DeleteTetromino();
@@ -391,17 +405,16 @@ function CheckForVerticalCollison() {
       break;
     }
   }
+
   if (collision) {
     // Check for game over and if so set game over text
     if (startY <= 2) {
       winOrLose = "Game Over";
-      ctx.fillStyle = "white";
-      ctx.fillRect(310, 242, 140, 30);
       ctx.fillStyle = "black";
-      ctx.fillText(winOrLose, 310, 261);
+      ctx.font = "24px Arial";
+      ctx.fillText("Game Over", 80, 36);
     } else {
-      // Add stopped Tetromino to stopped shape array
-      // so I can check for future collisions
+      // Add stopped Tetromino to stopped shape array so it can check for future collisions
       for (let i = 0; i < tetrominoCopy.length; i++) {
         let square = tetrominoCopy[i];
         let x = square[0] + startX;
@@ -473,8 +486,7 @@ function CheckForCompletedRows() {
 
       // Check if nothing is there
       if (square === 0 || typeof square === "undefined") {
-        // If there is nothing there once then jump out
-        // because the row isn't completed
+        // If there is nothing there once then jump out because the row isn't completed
         completed = false;
         break;
       }
@@ -482,7 +494,7 @@ function CheckForCompletedRows() {
 
     // If a row has been completed
     if (completed) {
-      // 8. Used to shift down the rows
+      // Used to shift down the rows
       if (startOfDeletion === 0) startOfDeletion = y;
       rowsToDelete++;
 
@@ -500,17 +512,19 @@ function CheckForCompletedRows() {
       }
     }
   }
+
   if (rowsToDelete > 0) {
+    // score = lines * 20 - 10;
     score += 10;
     ctx.fillStyle = "white";
-    // To fill just the inside gap without superposition of the rectangle, need apply +2, +2, -5, -5 in the original StrokeRect
+    // To fill the text box without superposition of the rectangle, need apply +2, +2, -5, -5 in the original StrokeRect
     ctx.fillRect(302, 173, 156, 19);
     ctx.fillStyle = "black";
     ctx.fillText(score.toString(), 310, 190);
     MoveAllRowsDown(rowsToDelete, startOfDeletion);
   }
 
-  // Level Up logic, increasing speed/difficulty
+  // Level Up, increasing speed/difficulty
   if (score >= 2 * level * levelUp) {
     speed += 0.75;
     level++;
@@ -535,7 +549,7 @@ function MoveAllRowsDown(rowsToDelete, startOfDeletion) {
 
       if (typeof square === "string") {
         nextSquare = square;
-        gameBoardArray[x][y2] = 1; // Put block into GBA
+        gameBoardArray[x][y2] = 1; // Put block into Gameboard array
         stoppedShapeArray[x][y2] = square; // Draw color into stopped
 
         // Look for the x & y values in the lookup table
@@ -545,7 +559,7 @@ function MoveAllRowsDown(rowsToDelete, startOfDeletion) {
         ctx.fillRect(coorX, coorY, 21, 21);
 
         square = 0;
-        gameBoardArray[x][i] = 0; // Clear the spot in GBA
+        gameBoardArray[x][i] = 0; // Clear the spot in gameboard array
         stoppedShapeArray[x][i] = 0; // Clear the spot in SSA
         coorX = coordinateArray[x][i].x;
         coorY = coordinateArray[x][i].y;
